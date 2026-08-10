@@ -1,0 +1,49 @@
+from collections import deque
+
+# Grid
+grid = [
+    ['S', '.', '.', '#'],
+    ['.', '#', '.', '.'],
+    ['.', '.', '.', '#'],
+    ['#', '.', '.', 'T']
+]
+
+rows = len(grid)
+cols = len(grid[0])
+
+# Find Start and Treasure
+for i in range(rows):
+    for j in range(cols):
+        if grid[i][j] == 'S':
+            start = (i, j)
+        if grid[i][j] == 'T':
+            goal = (i, j)
+
+# BFS
+queue = deque()
+queue.append((start, 0))      # (position, distance)
+
+visited = set()
+visited.add(start)
+
+# Up, Down, Left, Right
+moves = [(-1,0), (1,0), (0,-1), (0,1)]
+
+while queue:
+    (x, y), dist = queue.popleft()
+
+    print("Visited:", (x, y))
+
+    if (x, y) == goal:
+        print("\nTreasure Found!")
+        print("Distance =", dist)
+        break
+
+    for dx, dy in moves:
+        nx = x + dx
+        ny = y + dy
+
+        if 0 <= nx < rows and 0 <= ny < cols:
+            if grid[nx][ny] != '#' and (nx, ny) not in visited:
+                visited.add((nx, ny))
+                queue.append(((nx, ny), dist + 1))

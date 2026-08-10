@@ -1,0 +1,50 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Aug  3 19:52:19 2026
+
+@author: admin
+"""
+
+import heapq
+
+class Student:
+
+    def __init__(self, a, b, c, d, e, key):
+        self.a = a
+        self.b = b
+        self.c = c
+        self.d = d
+        self.e = e
+        self.key = key          # Which variable to compare
+
+    def __lt__(self, other):
+
+        if self.key == 1:
+            return self.a < other.a
+
+        elif self.key == 2:
+            return self.b < other.b
+
+        elif self.key == 3:
+            return self.c < other.c
+
+        elif self.key == 4:
+            return self.d < other.d
+
+        elif self.key == 5:
+            return self.e < other.e
+
+    def __repr__(self):
+        return f"({self.a},{self.b},{self.c},{self.d},{self.e})"
+
+
+heap = []
+
+# Compare using first variable (a)
+heapq.heappush(heap, Student(30, 5, 8, 4, 2, 2))
+heapq.heappush(heap, Student(10, 9, 7, 6, 5, 2))
+heapq.heappush(heap, Student(20, 1, 4, 3, 8, 2))
+
+print("Compare by first variable:")
+while heap:
+    print(heapq.heappop(heap))
