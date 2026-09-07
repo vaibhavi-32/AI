@@ -1,0 +1,1660 @@
+#Q1
+
+
+
+# -*- coding: utf-8 -*-
+
+"""
+Created on Sun Aug 30 22:45:27 2026
+
+@author: admin
+"""
+
+
+# Import the tkinter library for creating the GUI.
+import tkinter as tk
+
+# Import messagebox for displaying popup messages.
+from tkinter import messagebox
+
+# Import random for selecting random moves.
+import random
+
+
+# Create a class named TicTacToe.
+class TicTacToe:
+
+    # Step 1: Initialize the Tic-Tac-Toe game.
+    def __init__(self, root):
+
+        # Step 2: Store the main window in self.root.
+        self.root = root
+
+        # Step 3: Set the title of the window.
+        self.root.title("Tic Tac Toe")
+
+        # Step 4: Set the size of the game window.
+        self.root.geometry("400x500")
+
+        # Step 5: Create a list of 9 empty positions
+        # to represent the Tic-Tac-Toe board.
+        self.board = [""] * 9
+
+        # Step 6: Create an empty list to store
+        # all the GUI buttons of the board.
+        self.buttons = []
+
+        # Step 7: Assign X to the human player.
+        self.player = "X"
+
+        # Step 8: Assign O to the computer.
+        self.computer = "O"
+
+
+        # Step 9: Create a title label.
+        title = tk.Label(
+
+            # Specify the parent window.
+            root,
+
+            # Set the text of the title.
+            text="TIC TAC TOE",
+
+            # Set the font style and size.
+            font=("Arial", 24, "bold")
+        )
+
+        # Step 10: Display the title with vertical padding.
+        title.pack(pady=20)
+
+
+        # Step 11: Create a frame to hold
+        # the Tic-Tac-Toe board.
+        board_frame = tk.Frame(root)
+
+        # Step 12: Display the board frame.
+        board_frame.pack()
+
+
+        # Step 13: Create 9 buttons for the board.
+        for i in range(9):
+
+            # Step 14: Create one button.
+            button = tk.Button(
+
+                # Specify the board frame as parent.
+                board_frame,
+
+                # Initially keep the button text empty.
+                text="",
+
+                # Set the font style and size.
+                font=("Arial", 30, "bold"),
+
+                # Set the width of the button.
+                width=4,
+
+                # Set the height of the button.
+                height=2,
+
+                # When the button is clicked,
+                # call player_move with its position.
+                command=lambda i=i: self.player_move(i)
+            )
+
+            # Step 15: Place the button in a 3 x 3 grid.
+            button.grid(
+
+                # Calculate the row number.
+                row=i // 3,
+
+                # Calculate the column number.
+                column=i % 3,
+
+                # Add horizontal padding.
+                padx=3,
+
+                # Add vertical padding.
+                pady=3
+            )
+
+            # Step 16: Store the button in the buttons list.
+            self.buttons.append(button)
+
+
+        # Step 17: Create a status label.
+        self.status = tk.Label(
+
+            # Specify the parent window.
+            root,
+
+            # Display the initial game status.
+            text="Your turn (X)",
+
+            # Set the font.
+            font=("Arial", 14)
+        )
+
+        # Step 18: Display the status label.
+        self.status.pack(pady=15)
+
+
+        # Step 19: Create a New Game button.
+        new_game = tk.Button(
+
+            # Specify the parent window.
+            root,
+
+            # Set the button text.
+            text="New Game",
+
+            # Set the font.
+            font=("Arial", 12),
+
+            # Call reset_game when the button is clicked.
+            command=self.reset_game
+        )
+
+        # Step 20: Display the New Game button.
+        new_game.pack()
+
+
+    # -----------------------------------
+    # Player move
+    # -----------------------------------
+
+    # Step 1: Define the function for the player's move.
+    def player_move(self, position):
+
+        # Step 2: Check whether the selected position
+        # is already occupied.
+        if self.board[position] != "":
+
+            # Step 3: Stop the function if the cell is occupied.
+            return
+
+
+        # Step 4: Put X in the selected board position.
+        self.board[position] = self.player
+
+        # Step 5: Display X on the corresponding button.
+        self.buttons[position]["text"] = self.player
+
+
+        # Step 6: Check whether the player has won.
+        if self.check_winner(self.player):
+
+            # Step 7: Update the status message.
+            self.status["text"] = "You Win!"
+
+            # Step 8: Display a winning popup message.
+            messagebox.showinfo(
+                "Game Over",
+                "Congratulations! You Win!"
+            )
+
+            # Step 9: Disable all board buttons.
+            self.disable_board()
+
+            # Step 10: Stop the function.
+            return
+
+
+        # Step 11: Check whether all positions are filled.
+        if "" not in self.board:
+
+            # Step 12: Update the status message.
+            self.status["text"] = "Draw!"
+
+            # Step 13: Display a draw message.
+            messagebox.showinfo(
+                "Game Over",
+                "Game Draw!"
+            )
+
+            # Step 14: Stop the function.
+            return
+
+
+        # Step 15: Display that the computer is thinking.
+        self.status["text"] = "Computer thinking..."
+
+        # Step 16: Wait for 500 milliseconds
+        # and then call computer_move.
+        self.root.after(
+            500,
+            self.computer_move
+        )
+
+
+    # -----------------------------------
+    # Computer move
+    # -----------------------------------
+
+    # Step 1: Define the function for the computer's move.
+    def computer_move(self):
+
+        # Step 2: Find the best move using
+        # the heuristic strategy.
+        position = self.find_best_move()
+
+
+        # Step 3: Check whether a valid position exists.
+        if position is not None:
+
+            # Step 4: Put O in the selected position.
+            self.board[position] = self.computer
+
+            # Step 5: Display O on the corresponding button.
+            self.buttons[position]["text"] = self.computer
+
+
+        # Step 6: Check whether the computer has won.
+        if self.check_winner(self.computer):
+
+            # Step 7: Update the status message.
+            self.status["text"] = "Computer Wins!"
+
+            # Step 8: Display a losing popup message.
+            messagebox.showinfo(
+                "Game Over",
+                "Computer Wins!"
+            )
+
+            # Step 9: Disable all board buttons.
+            self.disable_board()
+
+            # Step 10: Stop the function.
+            return
+
+
+        # Step 11: Check whether the board is full.
+        if "" not in self.board:
+
+            # Step 12: Update the status message.
+            self.status["text"] = "Draw!"
+
+            # Step 13: Display a draw popup message.
+            messagebox.showinfo(
+                "Game Over",
+                "Game Draw!"
+            )
+
+            # Step 14: Stop the function.
+            return
+
+
+        # Step 15: Change the status back
+        # to the player's turn.
+        self.status["text"] = "Your turn (X)"
+
+
+    # -----------------------------------
+    # Simple heuristic AI
+    # -----------------------------------
+
+    # Step 1: Define a function to find
+    # the best move for the computer.
+    def find_best_move(self):
+
+
+        # Step 2: First priority:
+        # Try to find a winning move.
+        for i in range(9):
+
+            # Step 3: Check whether the position is empty.
+            if self.board[i] == "":
+
+                # Step 4: Temporarily place O.
+                self.board[i] = self.computer
+
+                # Step 5: Check whether placing O here
+                # makes the computer win.
+                if self.check_winner(self.computer):
+
+                    # Step 6: Remove the temporary O.
+                    self.board[i] = ""
+
+                    # Step 7: Return this winning position.
+                    return i
+
+                # Step 8: Remove the temporary O
+                # if it does not result in a win.
+                self.board[i] = ""
+
+
+        # Step 9: Second priority:
+        # Block the player's winning move.
+        for i in range(9):
+
+            # Step 10: Check whether the position is empty.
+            if self.board[i] == "":
+
+                # Step 11: Temporarily place X.
+                self.board[i] = self.player
+
+                # Step 12: Check whether the player
+                # would win from this position.
+                if self.check_winner(self.player):
+
+                    # Step 13: Remove the temporary X.
+                    self.board[i] = ""
+
+                    # Step 14: Return this position
+                    # so the computer can block it.
+                    return i
+
+                # Step 15: Remove the temporary X.
+                self.board[i] = ""
+
+
+        # Step 16: Third priority:
+        # Take the center position.
+        if self.board[4] == "":
+
+            # Step 17: Return the center position.
+            return 4
+
+
+        # Step 18: Fourth priority:
+        # Try to take one of the corners.
+        corners = [0, 2, 6, 8]
+
+
+        # Step 19: Create a list containing
+        # all empty corner positions.
+        empty_corners = [
+
+            i for i in corners
+
+            if self.board[i] == ""
+        ]
+
+
+        # Step 20: Check whether any corner is available.
+        if empty_corners:
+
+            # Step 21: Randomly select an empty corner.
+            return random.choice(empty_corners)
+
+
+        # Step 22: Fifth priority:
+        # Find all empty positions.
+        empty_positions = [
+
+            i for i in range(9)
+
+            if self.board[i] == ""
+        ]
+
+
+        # Step 23: Check whether any position is available.
+        if empty_positions:
+
+            # Step 24: Randomly select an empty position.
+            return random.choice(empty_positions)
+
+
+        # Step 25: Return None if no position is available.
+        return None
+
+
+    # -----------------------------------
+    # Check winner
+    # -----------------------------------
+
+    # Step 1: Define a function to check
+    # whether a player has won.
+    def check_winner(self, player):
+
+        # Step 2: Store all possible
+        # winning combinations.
+        winning_patterns = [
+
+            # Rows
+            (0, 1, 2),
+            (3, 4, 5),
+            (6, 7, 8),
+
+            # Columns
+            (0, 3, 6),
+            (1, 4, 7),
+            (2, 5, 8),
+
+            # Diagonals
+            (0, 4, 8),
+            (2, 4, 6)
+        ]
+
+
+        # Step 3: Check every winning pattern.
+        for pattern in winning_patterns:
+
+            # Step 4: Store the three positions
+            # of the current pattern.
+            a, b, c = pattern
+
+
+            # Step 5: Check whether all three
+            # positions contain the same player's symbol.
+            if (
+
+                self.board[a] == player and
+
+                self.board[b] == player and
+
+                self.board[c] == player
+            ):
+
+                # Step 6: Return True if the player wins.
+                return True
+
+
+        # Step 7: Return False if no winning
+        # pattern is found.
+        return False
+
+
+    # -----------------------------------
+    # Disable board
+    # -----------------------------------
+
+    # Step 1: Define a function to disable
+    # all the game buttons.
+    def disable_board(self):
+
+        # Step 2: Go through every button.
+        for button in self.buttons:
+
+            # Step 3: Disable the button.
+            button["state"] = "disabled"
+
+
+    # -----------------------------------
+    # Reset game
+    # -----------------------------------
+
+    # Step 1: Define a function to start
+    # a new game.
+    def reset_game(self):
+
+        # Step 2: Create a new empty board.
+        self.board = [""] * 9
+
+
+        # Step 3: Go through every board button.
+        for button in self.buttons:
+
+            # Step 4: Remove the text from the button.
+            button["text"] = ""
+
+            # Step 5: Enable the button again.
+            button["state"] = "normal"
+
+
+        # Step 6: Reset the status message.
+        self.status["text"] = "Your turn (X)"
+
+
+# ---------------------------------------
+# Main program
+# ---------------------------------------
+
+
+# Step 1: Create the main Tkinter window.
+root = tk.Tk()
+
+
+# Step 2: Create an object of the TicTacToe class.
+game = TicTacToe(root)
+
+
+# Step 3: Start the Tkinter event loop.
+# The window remains active until it is closed.
+root.mainloop()
+
+
+
+
+
+#Q2
+
+# Import the tkinter library for creating the GUI.
+import tkinter as tk
+
+# Import random for selecting a random move.
+import random
+
+# Import Counter to count how many times
+# each move appears in the player's history.
+from collections import Counter
+
+
+# Create a class named RPS for the
+# Rock-Paper-Scissors game.
+class RPS:
+
+
+    # Step 1: Initialize the game.
+    def __init__(self, root):
+
+        # Step 2: Store the main window.
+        self.root = root
+
+        # Step 3: Set the title of the window.
+        self.root.title("Rock Paper Scissors")
+
+
+        # Step 4: Create an empty list to store
+        # the history of the player's moves.
+        self.history = []
+
+
+        # Step 5: Set the player's initial score to 0.
+        self.player_score = 0
+
+
+        # Step 6: Set the computer's initial score to 0.
+        self.computer_score = 0
+
+
+        # Step 7: Create a title label for the game.
+        tk.Label(
+
+            # Specify the parent window.
+            root,
+
+            # Set the title text.
+            text="ROCK PAPER SCISSORS",
+
+            # Set the font style and size.
+            font=("Arial", 22, "bold")
+
+        # Step 8: Display the title with vertical padding.
+        ).pack(pady=20)
+
+
+        # Step 9: Create a label to display
+        # the moves and the result.
+        self.result = tk.Label(
+
+            # Specify the parent window.
+            root,
+
+            # Display the initial instruction.
+            text="Choose your move",
+
+            # Set the font.
+            font=("Arial", 15)
+        )
+
+
+        # Step 10: Display the result label.
+        self.result.pack(pady=10)
+
+
+        # Step 11: Create a frame to hold
+        # the Rock, Paper and Scissors buttons.
+        frame = tk.Frame(root)
+
+
+        # Step 12: Display the frame.
+        frame.pack()
+
+
+        # Step 13: Go through each possible move.
+        for move in ["Rock", "Paper", "Scissors"]:
+
+
+            # Step 14: Create a button for each move.
+            tk.Button(
+
+                # Specify the frame as parent.
+                frame,
+
+                # Display the move name on the button.
+                text=move,
+
+                # Set the width of the button.
+                width=12,
+
+                # When clicked, call the play function
+                # and pass the selected move.
+                command=lambda m=move: self.play(m)
+
+            # Step 15: Display buttons horizontally.
+            ).pack(
+
+                # Place buttons from left to right.
+                side="left",
+
+                # Add horizontal spacing.
+                padx=5
+            )
+
+
+        # Step 16: Create a label to display
+        # the player and computer scores.
+        self.score = tk.Label(
+
+            # Specify the parent window.
+            root,
+
+            # Set the initial score.
+            text="You: 0    Computer: 0",
+
+            # Set the font.
+            font=("Arial", 14)
+        )
+
+
+        # Step 17: Display the score label.
+        self.score.pack(pady=20)
+
+
+    # -----------------------------------
+    # Play the game
+    # -----------------------------------
+
+
+    # Step 1: Define a function that is called
+    # whenever the player selects a move.
+    def play(self, player):
+
+
+        # Step 2: Store the player's selected move
+        # in the history list.
+        self.history.append(player)
+
+
+        # Step 3: Ask the computer to predict
+        # and select its move using the heuristic.
+        computer = self.predict_move()
+
+
+        # Step 4: Determine the winner by comparing
+        # the player and computer moves.
+        winner = self.get_winner(
+            player,
+            computer
+        )
+
+
+        # Step 5: Check whether the player won.
+        if winner == "player":
+
+            # Step 6: Increase the player's score by 1.
+            self.player_score += 1
+
+            # Step 7: Store the result message.
+            text = "You Win!"
+
+
+        # Step 8: Check whether the computer won.
+        elif winner == "computer":
+
+            # Step 9: Increase the computer's score by 1.
+            self.computer_score += 1
+
+            # Step 10: Store the result message.
+            text = "Computer Wins!"
+
+
+        # Step 11: If neither player wins,
+        # the game is a draw.
+        else:
+
+            # Step 12: Store the draw message.
+            text = "Draw!"
+
+
+        # Step 13: Display the selected moves
+        # and the result.
+        self.result["text"] = (
+
+            # Display the player's move.
+            f"You: {player}\n"
+
+            # Display the computer's move.
+            f"Computer: {computer}\n\n"
+
+            # Display the winner.
+            f"{text}"
+        )
+
+
+        # Step 14: Update and display the scores.
+        self.score["text"] = (
+
+            # Display the player's score.
+            f"You: {self.player_score}    "
+
+            # Display the computer's score.
+            f"Computer: {self.computer_score}"
+        )
+
+
+    # -----------------------------------
+    # Frequency Heuristic
+    # -----------------------------------
+
+
+    # Step 1: Define a function to predict
+    # the player's likely move.
+    def predict_move(self):
+
+
+        # Step 2: Check whether there are fewer
+        # than 3 moves in the player's history.
+        if len(self.history) < 3:
+
+
+            # Step 3: If there is not enough history,
+            # select a random move.
+            return random.choice(
+
+                # Choose randomly from the three moves.
+                ["Rock", "Paper", "Scissors"]
+            )
+
+
+        # Step 4: Count how many times each move
+        # appears in the player's history.
+        counts = Counter(self.history)
+
+
+        # Step 5: Find the move that occurs
+        # most frequently.
+        predicted = counts.most_common(1)[0][0]
+
+
+        # Step 6: If the predicted player move
+        # is Rock, choose Paper to beat Rock.
+        if predicted == "Rock":
+            return "Paper"
+
+
+        # Step 7: If the predicted player move
+        # is Paper, choose Scissors to beat Paper.
+        if predicted == "Paper":
+            return "Scissors"
+
+
+        # Step 8: If the predicted player move
+        # is Scissors, choose Rock to beat Scissors.
+        return "Rock"
+
+
+    # -----------------------------------
+    # Determine winner
+    # -----------------------------------
+
+
+    # Step 1: Define a function to determine
+    # who wins the game.
+    def get_winner(self, p, c):
+
+
+        # Step 2: Check whether both players
+        # selected the same move.
+        if p == c:
+
+            # Step 3: Return draw.
+            return "draw"
+
+
+        # Step 4: Check all conditions where
+        # the player wins.
+        if (
+
+            # Rock defeats Scissors.
+            (p == "Rock" and c == "Scissors")
+
+            or
+
+            # Paper defeats Rock.
+            (p == "Paper" and c == "Rock")
+
+            or
+
+            # Scissors defeats Paper.
+            (p == "Scissors" and c == "Paper")
+        ):
+
+            # Step 5: Return player as the winner.
+            return "player"
+
+
+        # Step 6: If it is not a draw and
+        # the player did not win,
+        # the computer wins.
+        return "computer"
+
+
+# ---------------------------------------
+# Main Program
+# ---------------------------------------
+
+
+# Step 1: Create the main Tkinter window.
+root = tk.Tk()
+
+
+# Step 2: Create an object of the RPS class.
+game = RPS(root)
+
+
+# Step 3: Start the Tkinter event loop.
+# The window remains active until closed.
+root.mainloop()
+
+
+
+
+
+#Q3
+
+# Import the tkinter library for creating the GUI.
+import tkinter as tk
+
+# Import messagebox for displaying popup messages.
+from tkinter import messagebox
+
+
+# Create a class named NumberGame.
+class NumberGame:
+
+
+    # Step 1: Initialize the Number Guessing game.
+    def __init__(self, root):
+
+        # Step 2: Store the main window.
+        self.root = root
+
+        # Step 3: Set the title of the window.
+        self.root.title("Number Guessing AI")
+
+
+        # Step 4: Set the lowest possible number.
+        self.low = 1
+
+
+        # Step 5: Set the highest possible number.
+        self.high = 100
+
+
+        # Step 6: Create a variable to store
+        # the computer's current guess.
+        self.guess = None
+
+
+        # Step 7: Create a label to tell the user
+        # to think of a number.
+        tk.Label(
+
+            # Specify the parent window.
+            root,
+
+            # Display the instruction.
+            text="Think of a number from 1 to 100",
+
+            # Set the font style and size.
+            font=("Arial", 18, "bold")
+
+        # Step 8: Display the instruction label.
+        ).pack(pady=20)
+
+
+        # Step 9: Create a label to display
+        # the computer's current guess.
+        self.display = tk.Label(
+
+            # Specify the parent window.
+            root,
+
+            # Initially keep the display empty.
+            text="",
+
+            # Set the font size.
+            font=("Arial", 30)
+        )
+
+
+        # Step 10: Display the guess label.
+        self.display.pack(pady=20)
+
+
+        # Step 11: Create a frame to hold
+        # the Higher, Correct and Lower buttons.
+        frame = tk.Frame(root)
+
+
+        # Step 12: Display the frame.
+        frame.pack()
+
+
+        # Step 13: Create the Higher button.
+        tk.Button(
+
+            # Specify the frame as parent.
+            frame,
+
+            # Set the button text.
+            text="Higher",
+
+            # Set the width of the button.
+            width=12,
+
+            # Call the higher function when clicked.
+            command=self.higher
+
+        # Step 14: Place the button in row 0,
+        # column 0.
+        ).grid(
+
+            row=0,
+
+            column=0,
+
+            # Add horizontal spacing.
+            padx=5
+        )
+
+
+        # Step 15: Create the Correct button.
+        tk.Button(
+
+            # Specify the frame as parent.
+            frame,
+
+            # Set the button text.
+            text="Correct",
+
+            # Set the button width.
+            width=12,
+
+            # Call the correct function when clicked.
+            command=self.correct
+
+        # Step 16: Place the button in row 0,
+        # column 1.
+        ).grid(
+
+            row=0,
+
+            column=1,
+
+            # Add horizontal spacing.
+            padx=5
+        )
+
+
+        # Step 17: Create the Lower button.
+        tk.Button(
+
+            # Specify the frame as parent.
+            frame,
+
+            # Set the button text.
+            text="Lower",
+
+            # Set the button width.
+            width=12,
+
+            # Call the lower function when clicked.
+            command=self.lower
+
+        # Step 18: Place the button in row 0,
+        # column 2.
+        ).grid(
+
+            row=0,
+
+            column=2,
+
+            # Add horizontal spacing.
+            padx=5
+        )
+
+
+        # Step 19: Create a New Game button.
+        tk.Button(
+
+            # Specify the main window as parent.
+            root,
+
+            # Set the button text.
+            text="New Game",
+
+            # Call the reset function when clicked.
+            command=self.reset
+
+        # Step 20: Display the New Game button.
+        ).pack(pady=20)
+
+
+        # Step 21: Make the first guess.
+        self.make_guess()
+
+
+    # -----------------------------------
+    # Make a guess
+    # -----------------------------------
+
+
+    # Step 1: Define a function for the
+    # computer to make a guess.
+    def make_guess(self):
+
+
+        # Step 2: Check whether there is
+        # a valid range remaining.
+        if self.low <= self.high:
+
+
+            # Step 3: Calculate the middle value
+            # between the lowest and highest values.
+            self.guess = (
+
+                self.low + self.high
+
+            ) // 2
+
+
+            # Step 4: Display the computer's guess.
+            self.display["text"] = str(self.guess)
+
+
+        # Step 5: If the lower value becomes
+        # greater than the higher value,
+        # the user's answers are inconsistent.
+        else:
+
+            # Step 6: Display an error message.
+            messagebox.showerror(
+
+                # Set the popup title.
+                "Error",
+
+                # Display the error message.
+                "Your answers are inconsistent."
+            )
+
+
+    # -----------------------------------
+    # Higher
+    # -----------------------------------
+
+
+    # Step 1: Define the function that is called
+    # when the user says the number is higher.
+    def higher(self):
+
+
+        # Step 2: Remove the current guess
+        # and all smaller numbers.
+        self.low = self.guess + 1
+
+
+        # Step 3: Make a new guess using
+        # the updated range.
+        self.make_guess()
+
+
+    # -----------------------------------
+    # Lower
+    # -----------------------------------
+
+
+    # Step 1: Define the function that is called
+    # when the user says the number is lower.
+    def lower(self):
+
+
+        # Step 2: Remove the current guess
+        # and all larger numbers.
+        self.high = self.guess - 1
+
+
+        # Step 3: Make a new guess using
+        # the updated range.
+        self.make_guess()
+
+
+    # -----------------------------------
+    # Correct
+    # -----------------------------------
+
+
+    # Step 1: Define the function that is called
+    # when the computer guesses the correct number.
+    def correct(self):
+
+
+        # Step 2: Display a popup showing
+        # the number that was found.
+        messagebox.showinfo(
+
+            # Set the popup title.
+            "Game",
+
+            # Display the correct number.
+            f"I found your number: {self.guess}"
+        )
+
+
+        # Step 3: Start a new game.
+        self.reset()
+
+
+    # -----------------------------------
+    # Reset Game
+    # -----------------------------------
+
+
+    # Step 1: Define a function to reset
+    # the game.
+    def reset(self):
+
+
+        # Step 2: Reset the lowest value to 1.
+        self.low = 1
+
+
+        # Step 3: Reset the highest value to 100.
+        self.high = 100
+
+
+        # Step 4: Make a new first guess.
+        self.make_guess()
+
+
+# ---------------------------------------
+# Main Program
+# ---------------------------------------
+
+
+# Step 1: Create the main Tkinter window.
+root = tk.Tk()
+
+
+# Step 2: Create an object of the NumberGame class.
+game = NumberGame(root)
+
+
+# Step 3: Start the Tkinter event loop.
+# The window remains active until closed.
+root.mainloop()
+
+
+
+
+
+#Q4
+
+
+# Import the tkinter library for creating
+# the graphical user interface.
+import tkinter as tk
+
+
+# Import random for generating a new
+# random position for the target.
+import random
+
+
+# Set the width of the game window.
+WIDTH = 600
+
+
+# Set the height of the game window.
+HEIGHT = 400
+
+
+# Set the number of pixels moved
+# in one step.
+STEP = 20
+
+
+# Create a class named CatchGame.
+class CatchGame:
+
+
+    # Step 1: Initialize the Catch the Target game.
+    def __init__(self, root):
+
+        # Step 2: Store the main window.
+        self.root = root
+
+
+        # Step 3: Set the title of the window.
+        self.root.title("Catch the Target")
+
+
+        # Step 4: Create a canvas where the
+        # player and target will be displayed.
+        self.canvas = tk.Canvas(
+
+            # Specify the parent window.
+            root,
+
+            # Set the width of the canvas.
+            width=WIDTH,
+
+            # Set the height of the canvas.
+            height=HEIGHT,
+
+            # Set the background color.
+            bg="white"
+        )
+
+
+        # Step 5: Display the canvas.
+        self.canvas.pack()
+
+
+        # Step 6: Set the initial X-coordinate
+        # of the player.
+        self.player_x = 100
+
+
+        # Step 7: Set the initial Y-coordinate
+        # of the player.
+        self.player_y = 200
+
+
+        # Step 8: Set the initial X-coordinate
+        # of the target.
+        self.target_x = 500
+
+
+        # Step 9: Set the initial Y-coordinate
+        # of the target.
+        self.target_y = 200
+
+
+        # Step 10: Set the initial score to 0.
+        self.score = 0
+
+
+        # Step 11: Create the player as a rectangle.
+        self.player = self.canvas.create_rectangle(
+
+            # Set the left X-coordinate.
+            self.player_x,
+
+            # Set the top Y-coordinate.
+            self.player_y,
+
+            # Set the right X-coordinate.
+            self.player_x + 30,
+
+            # Set the bottom Y-coordinate.
+            self.player_y + 30
+        )
+
+
+        # Step 12: Create the target as an oval.
+        self.target = self.canvas.create_oval(
+
+            # Set the left X-coordinate.
+            self.target_x,
+
+            # Set the top Y-coordinate.
+            self.target_y,
+
+            # Set the right X-coordinate.
+            self.target_x + 25,
+
+            # Set the bottom Y-coordinate.
+            self.target_y + 25
+        )
+
+
+        # Step 13: Create a label to display
+        # instructions and the score.
+        self.info = tk.Label(
+
+            # Specify the parent window.
+            root,
+
+            # Display the game instruction.
+            text="Use arrow keys to catch the target",
+
+            # Set the font.
+            font=("Arial", 14)
+        )
+
+
+        # Step 14: Display the information label.
+        self.info.pack()
+
+
+        # Step 15: Connect the Left Arrow key
+        # with the left movement function.
+        root.bind("<Left>", self.left)
+
+
+        # Step 16: Connect the Right Arrow key
+        # with the right movement function.
+        root.bind("<Right>", self.right)
+
+
+        # Step 17: Connect the Up Arrow key
+        # with the up movement function.
+        root.bind("<Up>", self.up)
+
+
+        # Step 18: Connect the Down Arrow key
+        # with the down movement function.
+        root.bind("<Down>", self.down)
+
+
+        # Step 19: Start the AI movement of the target.
+        self.ai_move()
+
+
+    # -----------------------------------
+    # Move Player Left
+    # -----------------------------------
+
+
+    # Step 1: Define the function for moving
+    # the player to the left.
+    def left(self, event):
+
+        # Step 2: Decrease the player's X-coordinate.
+        self.player_x -= STEP
+
+
+        # Step 3: Update the player's position.
+        self.update_player()
+
+
+    # -----------------------------------
+    # Move Player Right
+    # -----------------------------------
+
+
+    # Step 1: Define the function for moving
+    # the player to the right.
+    def right(self, event):
+
+        # Step 2: Increase the player's X-coordinate.
+        self.player_x += STEP
+
+
+        # Step 3: Update the player's position.
+        self.update_player()
+
+
+    # -----------------------------------
+    # Move Player Up
+    # -----------------------------------
+
+
+    # Step 1: Define the function for moving
+    # the player upward.
+    def up(self, event):
+
+        # Step 2: Decrease the player's Y-coordinate.
+        self.player_y -= STEP
+
+
+        # Step 3: Update the player's position.
+        self.update_player()
+
+
+    # -----------------------------------
+    # Move Player Down
+    # -----------------------------------
+
+
+    # Step 1: Define the function for moving
+    # the player downward.
+    def down(self, event):
+
+        # Step 2: Increase the player's Y-coordinate.
+        self.player_y += STEP
+
+
+        # Step 3: Update the player's position.
+        self.update_player()
+
+
+    # -----------------------------------
+    # Update Player Position
+    # -----------------------------------
+
+
+    # Step 1: Define a function to update
+    # the player's position on the canvas.
+    def update_player(self):
+
+
+        # Step 2: Keep the player's X-coordinate
+        # within the left and right boundaries.
+        self.player_x = max(
+
+            # The minimum allowed X-coordinate.
+            0,
+
+            # Select the smaller value so that
+            # the player does not cross the right boundary.
+            min(
+                WIDTH - 30,
+                self.player_x
+            )
+        )
+
+
+        # Step 3: Keep the player's Y-coordinate
+        # within the top and bottom boundaries.
+        self.player_y = max(
+
+            # The minimum allowed Y-coordinate.
+            0,
+
+            # Select the smaller value so that
+            # the player does not cross the bottom boundary.
+            min(
+                HEIGHT - 30,
+                self.player_y
+            )
+        )
+
+
+        # Step 4: Update the position of the
+        # player rectangle on the canvas.
+        self.canvas.coords(
+
+            # Specify which object to move.
+            self.player,
+
+            # Set the new left X-coordinate.
+            self.player_x,
+
+            # Set the new top Y-coordinate.
+            self.player_y,
+
+            # Set the new right X-coordinate.
+            self.player_x + 30,
+
+            # Set the new bottom Y-coordinate.
+            self.player_y + 30
+        )
+
+
+    # -----------------------------------
+    # AI Target Movement
+    # -----------------------------------
+
+
+    # Step 1: Define the function that controls
+    # the target using a movement heuristic.
+    def ai_move(self):
+
+
+        # Step 2: Heuristic:
+        # Move the target toward the player's
+        # current horizontal position.
+
+
+        # Step 3: Check whether the target is
+        # to the left of the player.
+        if self.target_x < self.player_x:
+
+            # Step 4: Move the target right.
+            self.target_x += STEP
+
+
+        # Step 5: Check whether the target is
+        # to the right of the player.
+        elif self.target_x > self.player_x:
+
+            # Step 6: Move the target left.
+            self.target_x -= STEP
+
+
+        # Step 7: Check whether the target is
+        # above the player.
+        if self.target_y < self.player_y:
+
+            # Step 8: Move the target downward.
+            self.target_y += STEP
+
+
+        # Step 9: Check whether the target is
+        # below the player.
+        elif self.target_y > self.player_y:
+
+            # Step 10: Move the target upward.
+            self.target_y -= STEP
+
+
+        # Step 11: Update the target's position
+        # on the canvas.
+        self.canvas.coords(
+
+            # Specify the target object.
+            self.target,
+
+            # Set the new left X-coordinate.
+            self.target_x,
+
+            # Set the new top Y-coordinate.
+            self.target_y,
+
+            # Set the new right X-coordinate.
+            self.target_x + 25,
+
+            # Set the new bottom Y-coordinate.
+            self.target_y + 25
+        )
+
+
+        # Step 12: Check whether the player
+        # has caught the target.
+        self.check_collision()
+
+
+        # Step 13: Call this function again
+        # after 150 milliseconds.
+        self.root.after(
+
+            # Wait for 150 milliseconds.
+            150,
+
+            # Call the AI movement function again.
+            self.ai_move
+        )
+
+
+    # -----------------------------------
+    # Check Collision
+    # -----------------------------------
+
+
+    # Step 1: Define a function to check
+    # whether the player catches the target.
+    def check_collision(self):
+
+
+        # Step 2: Calculate whether the horizontal
+        # distance between player and target
+        # is less than 30 pixels.
+        if (
+
+            abs(
+                self.player_x - self.target_x
+            ) < 30
+
+            and
+
+            # Step 3: Calculate whether the vertical
+            # distance between player and target
+            # is less than 30 pixels.
+            abs(
+                self.player_y - self.target_y
+            ) < 30
+        ):
+
+
+            # Step 4: Increase the score by 1.
+            self.score += 1
+
+
+            # Step 5: Display the updated score.
+            self.info["text"] = (
+
+                f"Target caught! Score: {self.score}"
+            )
+
+
+            # Step 6: Generate a new random
+            # X-coordinate for the target.
+            self.target_x = random.randint(
+
+                # Set the minimum X-coordinate.
+                50,
+
+                # Set the maximum X-coordinate.
+                WIDTH - 50
+            )
+
+
+            # Step 7: Generate a new random
+            # Y-coordinate for the target.
+            self.target_y = random.randint(
+
+                # Set the minimum Y-coordinate.
+                50,
+
+                # Set the maximum Y-coordinate.
+                HEIGHT - 50
+            )
+
+
+# ---------------------------------------
+# Main Program
+# ---------------------------------------
+
+
+# Step 1: Create the main Tkinter window.
+root = tk.Tk()
+
+
+# Step 2: Create an object of the CatchGame class.
+game = CatchGame(root)
+
+
+# Step 3: Start the Tkinter event loop.
+# The game window remains active until closed.
+root.mainloop()
+
+
+
+
+
+
+
